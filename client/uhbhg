@@ -1,0 +1,128 @@
+import React, { useState, useEffect } from 'react';
+import { Button, Label, Textarea, TextInput } from "flowbite-react";
+import axios from "axios";
+import EnquiryList from './EnquiryList';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+export default function Enquiry() {
+  const [FormData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+
+  const [enquiryList, setEnquiryList] = useState([]);
+
+  const saveEnquiry = (e) => {
+    e.preventDefault();
+    axios.post('http://localhost:3000/api/website/enquiry/insert', FormData)
+      .then(() => {
+        toast.success("ENQUIRY SUBMITTED SUCCESSFULLY");
+        setFormData({ name: '', email: '', phone: '', message: '' });
+        getAllenquiry(); // refresh list
+      });
+  };
+
+  const getAllenquiry = () => {
+    axios.get('http://localhost:3000/api/website/enquiry/view')
+      .then((res) => res.data)
+      .then((finalData) => {
+        if (finalData.status) {
+          setEnquiryList(finalData.data);
+        }
+      });
+  };
+
+  useEffect(() => {
+    getAllenquiry();
+  }, []);
+
+  const getValue = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div>
+      <ToastContainer />
+      <h1 className='text-4xl text-center py-5 font-bold'>Enquiry..</h1>
+      <div className='grid grid-cols-[30%_auto] gap-10'>
+        <div className='bg-gray-900 p-4'>
+          <h2 className='text-[20px] font-bold px-8 text-white'> Enquiry Form</h2>
+          <form onSubmit={saveEnquiry}>
+            <div className='py-3'>
+              <Label htmlFor="name" className='text-white'>Your Name</Label>
+              <TextInput onChange={getValue} value={FormData.name} name="name" type='text' required />
+            </div>
+            <div className='py-3'>
+              <Label htmlFor="email" className='text-white'>Your Email</Label>
+              <TextInput onChange={getValue} value={FormData.email} name="email" type='email' required />
+            </div>
+            <div className='py-3'>
+              <Label htmlFor="phone" className='text-white'>Your Contact No.</Label>
+              <TextInput onChange={getValue} value={FormData.phone} name="phone" type='text' required />
+            </div>
+            <div className='py-3'>
+              <Label htmlFor='message' className='text-white'>Your Message</Label>
+              <Textarea onChange={getValue} value={FormData.message} name="message" rows={5} required></Textarea>
+            </div>
+            <div className='py-3 '>
+              <Button type="submit" className='bg-gray-600 w-full hover:bg-green-700'>Save</Button>
+            </div>
+          </form>
+        </div>
+        <EnquiryList data={enquiryList} />
+      </div>
+    </div>
+  );
+}
+
+
+
+
+/* eslint-disable no-unused-vars */
+import React from 'react'
+import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
+
+
+export function EnquiryList({ data }) {
+  return (
+    <div className='bg-gray-100'>
+      <h2 className='text-[20px] font-bold px-8 mb-4 pt-4 '>
+        Enquiry List</h2>
+      <div className="overflow-x-auto">
+        <Table >
+          <TableHead>
+            <TableRow>
+              <TableHeadCell>Sr.No</TableHeadCell>
+              <TableHeadCell>Name</TableHeadCell>
+              <TableHeadCell>Email</TableHeadCell>
+              <TableHeadCell>Contact</TableHeadCell>
+              <TableHeadCell>Message</TableHeadCell>
+              <TableHeadCell>Edit</TableHeadCell>
+              <TableHeadCell>Delete</TableHeadCell>
+            </TableRow>
+          </TableHead>
+          <TableBody className="divide-y">
+            {
+              data.length >= 1 ?
+                data.map((item, index) => {
+                  return (<></>)
+                })
+                :
+                <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                  <TableCell colSpan={7} className='text-center'>No
+                    Data Found
+                  </TableCell>
+                </TableRow>
+            }
+
+          </TableBody>
+
+        </Table>
+      </div>
+    </div>
+  )
+}
